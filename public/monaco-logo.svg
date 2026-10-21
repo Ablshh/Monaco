@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" fill="none" color="#F3EDE4" role="img" aria-label="Monaco">
+  <defs>
+    <path id="mc-arc" d="M20 99.8C48.6 94.8 71.4 94.8 100 99.8"/>
+    <!-- Надпись вырезана из ленты, поэтому знак работает на любом фоне одним цветом -->
+    <mask id="mc-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="140">
+      <rect width="120" height="140" fill="#fff"/>
+      <text font-family="'Cormorant Garamond','Times New Roman',serif" font-size="8.2" font-weight="600" letter-spacing="2.4" fill="#000">
+        <textPath href="#mc-arc" startOffset="50%" text-anchor="middle">MONACO</textPath>
+      </text>
+    </mask>
+  </defs>
+  <g fill="currentColor">
+    <!-- Веточки над гербом -->
+    <path d="M60 4c3.4 4.6 3.4 10.4 0 15-3.4-4.6-3.4-10.4 0-15z"/>
+    <path d="M47.5 8.5c4.7 1.7 7.5 5.6 7.6 10.6-4.7-1.7-7.5-5.6-7.6-10.6z"/>
+    <path d="M72.5 8.5c-4.7 1.7-7.5 5.6-7.6 10.6 4.7-1.7 7.5-5.6 7.6-10.6z"/>
+    <path d="M36.6 15.2c4.6.3 7.9 2.9 9 7.3-4.6-.3-7.9-2.9-9-7.3z"/>
+    <path d="M83.4 15.2c-4.6.3-7.9 2.9-9 7.3 4.6-.3 7.9-2.9 9-7.3z"/>
+    <!-- Буква M: тонкий левый штамб, толстая левая диагональ, тонкая правая, толстый правый штамб -->
+    <path d="M42.2 49h2.4v33.2h-2.4z"/>
+    <path d="M42.6 49h5.6l13.4 30.6-1.9 4.2z"/>
+    <path d="M59.5 81.6 75.7 49h2.2L60.9 84.4z"/>
+    <path d="M75.3 49h5.8v33.2h-5.8z"/>
+    <path d="M37.8 47.8h10.6v1.6H37.8zM73.6 47.8h12v1.6h-12zM38.6 81.6h9.8v1.6h-9.8zM71.8 81.6h12.6v1.6H71.8z"/>
+  </g>
+  <!-- Щит: внешний и внутренний контур -->
+  <path d="M15 27c15-4 30-5.6 45-5.6s30 1.6 45 5.6v42c0 27-17.6 46.4-45 58C32.6 115.4 15 96 15 69z" stroke="currentColor" stroke-width="2.6"/>
+  <path d="M21 32c13-3.2 26-4.6 39-4.6s26 1.4 39 4.6v37c0 23.4-14.8 40.4-39 51-24.2-10.6-39-27.6-39-51z" stroke="currentColor" stroke-width="1"/>
+  <!-- Лента -->
+  <g fill="currentColor">
+    <path d="M6 96.5 18 93l2.2 10L8.5 107l3.2-5.4z"/>
+    <path d="M114 96.5 102 93l-2.2 10 11.7 4-3.2-5.4z"/>
+    <path d="M17 92.6c28.6-5.2 57.4-5.2 86 0l-2.2 11c-27.5-4.8-54.1-4.8-81.6 0z" mask="url(#mc-cut)"/>
+  </g>
+</svg>

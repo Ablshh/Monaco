@@ -1,0 +1,40 @@
+import { useId } from "react";
+
+// Знак Monaco: щит, буква M, веточки и лента. Цвет — currentColor.
+// Надпись вырезана из ленты маской, поэтому знак одноцветный на любом фоне.
+export function Logo({ className }: { className?: string }) {
+  const id = useId().replace(/:/g, "");
+  const arc = `arc-${id}`, cut = `cut-${id}`;
+  return (
+    <svg className={className} viewBox="0 0 120 140" fill="none" aria-hidden="true" focusable="false">
+      <defs>
+        <path id={arc} d="M20 99.8C48.6 94.8 71.4 94.8 100 99.8" />
+        <mask id={cut} maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="140">
+          <rect width="120" height="140" fill="#fff" />
+          <text style={{ fontFamily: "var(--font-display)" }} fontSize="8.2" fontWeight="600" letterSpacing="2.4" fill="#000">
+            <textPath href={`#${arc}`} startOffset="50%" textAnchor="middle">MONACO</textPath>
+          </text>
+        </mask>
+      </defs>
+      <g fill="currentColor">
+        <path d="M60 4c3.4 4.6 3.4 10.4 0 15-3.4-4.6-3.4-10.4 0-15z" />
+        <path d="M47.5 8.5c4.7 1.7 7.5 5.6 7.6 10.6-4.7-1.7-7.5-5.6-7.6-10.6z" />
+        <path d="M72.5 8.5c-4.7 1.7-7.5 5.6-7.6 10.6 4.7-1.7 7.5-5.6 7.6-10.6z" />
+        <path d="M36.6 15.2c4.6.3 7.9 2.9 9 7.3-4.6-.3-7.9-2.9-9-7.3z" />
+        <path d="M83.4 15.2c-4.6.3-7.9 2.9-9 7.3 4.6-.3 7.9-2.9 9-7.3z" />
+        <path d="M42.2 49h2.4v33.2h-2.4z" />
+        <path d="M42.6 49h5.6l13.4 30.6-1.9 4.2z" />
+        <path d="M59.5 81.6 75.7 49h2.2L60.9 84.4z" />
+        <path d="M75.3 49h5.8v33.2h-5.8z" />
+        <path d="M37.8 47.8h10.6v1.6H37.8zM73.6 47.8h12v1.6h-12zM38.6 81.6h9.8v1.6h-9.8zM71.8 81.6h12.6v1.6H71.8z" />
+      </g>
+      <path stroke="currentColor" strokeWidth="2.6" d="M15 27c15-4 30-5.6 45-5.6s30 1.6 45 5.6v42c0 27-17.6 46.4-45 58C32.6 115.4 15 96 15 69z" />
+      <path stroke="currentColor" strokeWidth="1" d="M21 32c13-3.2 26-4.6 39-4.6s26 1.4 39 4.6v37c0 23.4-14.8 40.4-39 51-24.2-10.6-39-27.6-39-51z" />
+      <g fill="currentColor">
+        <path d="M6 96.5 18 93l2.2 10L8.5 107l3.2-5.4z" />
+        <path d="M114 96.5 102 93l-2.2 10 11.7 4-3.2-5.4z" />
+        <path d="M17 92.6c28.6-5.2 57.4-5.2 86 0l-2.2 11c-27.5-4.8-54.1-4.8-81.6 0z" mask={`url(#${cut})`} />
+      </g>
+    </svg>
+  );
+}
