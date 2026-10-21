@@ -6,10 +6,11 @@ export const site = {
   city: "Кызылорда",
   address: "ул. Султана Бейбарса, 2",
   hours: "Ежедневно 10:00 — 24:00",
-  phone: "+7 702 920 08 07",
-  phoneHref: "tel:+77029200807",
+  // ТЕСТ: номер разработчика для проверки заявок. Номер ресторана из 2ГИС: +7 702 920 08 07
+  phone: "+7 778 189 38 36",
+  phoneHref: "tel:+77781893836",
   // Номер WhatsApp без «+» и пробелов: сюда приходят заявки на бронь и заказы
-  whatsappNumber: "77029200807",
+  whatsappNumber: "77781893836",
   instagram: "https://www.instagram.com/monaco.mk/",
   booking: {
     firstSlot: "11:00",
