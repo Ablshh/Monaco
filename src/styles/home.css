@@ -271,6 +271,57 @@ html:not(.lenis) { scroll-behavior: smooth; }
 .booking-done .book__actions { margin-top: 12px; }
 .booking-done .book__title { margin-bottom: 4px; }
 .book__check { width: 40px; height: 40px; color: var(--ivory-50); }
+
+/* Знак «в брони есть блюда»: золотой круг с курсивным «!» из заголовочного шрифта */
+.order-mark {
+  flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #E2C795, var(--gold-400) 60%, #8E6F43);
+  color: var(--rouge-950); font-family: var(--font-display); font-size: 21px; font-style: italic; font-weight: 600; line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 0 0 4px rgba(184,151,102,.18), 0 6px 14px -6px rgba(0,0,0,.6);
+}
+.order-mark--lg { width: 52px; height: 52px; font-size: 34px; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 0 0 7px rgba(184,151,102,.16), 0 10px 22px -8px rgba(0,0,0,.6); }
+
+/* Детали бронирования: свёрнуты, пока гость сам не захочет посмотреть */
+.book-order {
+  margin-top: 22px; border: 1px solid rgba(184,151,102,.45); border-radius: var(--radius-md);
+  background: rgba(184,151,102,.08);
+}
+.book-order summary {
+  display: flex; align-items: center; gap: 14px; padding: 14px 16px; cursor: pointer; list-style: none;
+}
+.book-order summary::-webkit-details-marker { display: none; }
+.book-order__head { flex: 1; display: grid; gap: 2px; min-width: 0; }
+.book-order__title { font-size: 15px; font-weight: 500; color: var(--ivory-50); }
+.book-order__sum { font-size: 13px; color: var(--ivory-300); }
+.book-order__chev { width: 18px; height: 18px; color: var(--ivory-300); transition: transform var(--dur-base) var(--ease-out); }
+.book-order[open] .book-order__chev { transform: rotate(180deg); }
+.book-order__body { display: grid; gap: 12px; padding: 0 16px 16px; }
+.book-order__note { font-size: 13px; color: var(--gold-400); }
+.book-order__list { display: grid; gap: 8px; }
+.book-order__list li { display: flex; justify-content: space-between; gap: 16px; font-size: 14px; color: var(--ivory-100); }
+.book-order__list li > span:last-child { flex: none; color: var(--ivory-300); }
+.book-order__total {
+  display: flex; justify-content: space-between; align-items: baseline; padding-top: 10px;
+  border-top: 1px solid rgba(251,248,243,.2); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ivory-300);
+}
+.book-order__total b { font-family: var(--font-display); font-size: 24px; font-weight: 600; letter-spacing: 0; color: var(--ivory-50); }
+.book-order__edit { justify-self: start; font-size: 13px; color: var(--ivory-300); text-decoration: underline; text-underline-offset: 3px; }
+.book-order__edit:hover { color: var(--ivory-50); }
+
+/* «Стол с блюдами?» перед отправкой брони */
+.confirm {
+  position: fixed; width: min(460px, calc(100vw - 32px)); max-width: none; margin: auto; padding: 36px 32px 30px;
+  border-radius: var(--radius-lg); color: var(--ivory-100); text-align: center;
+  background-color: rgba(31,3,5,.82);
+}
+.confirm[open] { display: grid; justify-items: center; gap: 16px; animation: confirm-in var(--dur-base) var(--ease-out); }
+.confirm::backdrop { background: rgba(10,1,2,.55); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+@keyframes confirm-in { from { opacity: 0; transform: translateY(12px) scale(.97); } }
+.confirm__title { font-size: clamp(40px, 6vw, 52px); line-height: 1; }
+.confirm__title .italic { color: var(--ivory-300); }
+.confirm__text { font-size: 16px; line-height: 1.5; color: var(--ivory-100); max-width: 34ch; }
+.confirm__actions { display: grid; gap: 10px; width: 100%; margin-top: 8px; }
+@media (prefers-reduced-motion: reduce) { .confirm[open] { animation: none; } }
 .book__info {
   position: absolute; left: calc(var(--gutter) + 48px); right: calc(var(--gutter) + 160px); bottom: 32px;
   display: flex; gap: 56px; margin: 0; font-size: var(--fs-small);

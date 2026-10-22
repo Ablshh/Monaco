@@ -44,8 +44,9 @@ export type BookingRequest = {
   comment?: string;
 };
 
-/** Текст заявки, который гость отправляет в WhatsApp ресторана — на языке сайта */
-export function bookingMessage(b: BookingRequest, d: Dict, locale: string): string {
+/** Текст заявки, который гость отправляет в WhatsApp ресторана — на языке сайта.
+ *  orderLines — блюда из заказа, которые гость попросил приготовить к столу */
+export function bookingMessage(b: BookingRequest, d: Dict, locale: string, orderLines: string[] = []): string {
   const m = d.book.msg;
   return [
     m.hello,
@@ -56,5 +57,6 @@ export function bookingMessage(b: BookingRequest, d: Dict, locale: string): stri
     `${m.time}: ${b.time}`,
     `${m.guests}: ${b.guests}`,
     ...(b.comment ? [`${m.wish}: ${b.comment}`] : []),
+    ...(orderLines.length ? ["", `${m.order}:`, ...orderLines] : []),
   ].join("\n");
 }

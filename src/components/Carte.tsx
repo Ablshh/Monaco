@@ -10,56 +10,130 @@ import { site, whatsappLink } from "@/data/site";
 import { localizeWeight } from "@/i18n/dict";
 import { useT } from "@/i18n/lang";
 import { asset } from "@/lib/asset";
+import { clearOrder, orderLinesText, setQty, useOrder } from "@/lib/order";
 import { LangSwitch, LangSync } from "./LangSwitch";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
-/** Фото блюда крупно: открывается по нажатию на миниатюру, закрывается крестиком, фоном или Esc */
-function DishZoom({ d, onClose }: { d: Dish; onClose: () => void }) {
-  const { t, tx } = useT();
+/** Окно на <dialog>: открыто, пока смонтировано; Esc и нажатие на фон закрывают */
+function useModal(onClose: () => void) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
+    // Без close() при размонтировании: окно уходит из DOM само, а лишнее событие close закрыло бы следующее
     const dlg = ref.current;
-    dlg?.showModal();
-    return () => dlg?.close();
+    if (dlg && !dlg.open) dlg.showModal();
   }, []);
-  const name = tx(d.name);
+  return {
+    ref, onClose,
+    onClick: (e: React.MouseEvent) => { if (e.target === e.currentTarget) onClose(); },
+  };
+}
+
+/** Порции блюда в заказе: − 2 + */
+function Qty({ d, qty }: { d: Dish; qty: number }) {
+  const { t, tx } = useT();
   return (
-    <dialog className={`zoom${d.available === false ? " zoom--off" : ""}`} ref={ref} aria-label={name} onClose={onClose}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="zoom__card">
-        <button className="zoom__close" type="button" onClick={onClose} aria-label={t.carte.close}><Icon name="close" /></button>
-        <img className="zoom__photo" src={asset(`/menu/${d.id}.webp`)} alt={name} width={640} height={640} />
-        <div className="zoom__text">
-          <h3 className="zoom__name">{name}</h3>
-          <p className="zoom__price num">{formatPrice(d.price)}</p>
-          {(d.description || d.weight) && (
-            <p className="zoom__meta">
-              {d.description && tx(d.description)}
-              {d.description && d.weight && " · "}
-              {d.weight && localizeWeight(d.weight, t)}
-            </p>
-          )}
-        </div>
+    <div className="qty" role="group" aria-label={tx(d.name)}>
+      <button type="button" onClick={() => setQty(d.id, qty - 1)} aria-label={t.order.less}><Icon name="minus" /></button>
+      <span className="qty__n num" aria-live="polite">{qty}</span>
+      <button type="button" onClick={() => setQty(d.id, qty + 1)} aria-label={t.order.more}><Icon name="plus" /></button>
+    </div>
+  );
+}
+
+/** Блюдо крупно: что это, из чего, сколько стоит — и добавить в заказ */
+function DishZoom({ d, onClose }: { d: Dish; onClose: () => void }) {
+  const { t, tx } = useT();
+  const { qtyOf } = useOrder();
+  const modal = useModal(onClose);
+  const name = tx(d.name);
+  const off = d.available === false;
+  const qty = qtyOf(d.id);
+  return (
+    <dialog className={`zoom${off ? " zoom--off" : ""}`} aria-label={name} {...modal}>
+      <button className="zoom__back" type="button" onClick={onClose} aria-label={t.carte.close}><Icon name="arrow-left" /></button>
+      {d.photo && <img className="zoom__photo" src={asset(`/menu/${d.id}.webp`)} alt={name} width={640} height={640} />}
+      <div className="zoom__text">
+        <h3 className="zoom__name">{name}</h3>
+        {(d.description || d.weight) && (
+          <p className="zoom__meta">
+            {d.description && tx(d.description)}
+            {d.description && d.weight && " · "}
+            {d.weight && <span className="num">{localizeWeight(d.weight, t)}</span>}
+          </p>
+        )}
+        <p className="zoom__price num">{formatPrice(d.price)}</p>
       </div>
+      <div className="zoom__actions">
+        {off ? <p className="zoom__off">{t.carte.off}</p>
+          : qty > 0 ? <><span className="zoom__in">{t.order.inOrder(qty)}</span><Qty d={d} qty={qty} /></>
+          : (
+            <button className="zoom__add" type="button" onClick={() => setQty(d.id, 1)}>
+              <Icon name="plus" />{t.order.add}
+            </button>
+          )}
+      </div>
+    </dialog>
+  );
+}
+
+/** Заказ гостя: блюда, порции, итог; заказать в WhatsApp или забронировать стол с этими блюдами */
+function OrderSheet({ onClose }: { onClose: () => void }) {
+  const { t, tx } = useT();
+  const { lines, total } = useOrder();
+  const modal = useModal(onClose);
+  const text = [t.order.msg, "", ...orderLinesText(lines, total, t, tx)].join("\n");
+  return (
+    <dialog className="zoom sheet" aria-labelledby="sheet-title" {...modal}>
+      <button className="zoom__back" type="button" onClick={onClose} aria-label={t.order.close}><Icon name="arrow-left" /></button>
+      <h2 className="sheet__title" id="sheet-title">{t.order.title} <span className="italic">{t.order.titleAccent}</span></h2>
+      {lines.length === 0 ? <p className="sheet__empty">{t.order.empty}</p> : (
+        <>
+          <ul className="sheet__list">
+            {lines.map(({ dish, qty, sum }) => (
+              <li key={dish.id}>
+                {dish.photo ? <img src={asset(`/menu/${dish.id}.webp`)} alt="" width={56} height={56} loading="lazy" />
+                  : <span className="sheet__ph" aria-hidden="true" />}
+                <span className="sheet__name">{tx(dish.name)}</span>
+                <span className="sheet__sum num">{formatPrice(sum)}</span>
+                <Qty d={dish} qty={qty} />
+              </li>
+            ))}
+          </ul>
+          <p className="sheet__total"><span>{t.order.total}</span><b className="num">{formatPrice(total)}</b></p>
+          <div className="sheet__actions">
+            <a className="sheet__btn sheet__btn--main" href={whatsappLink(text)} target="_blank" rel="noopener">
+              <Icon name="whatsapp" />{t.order.send}
+            </a>
+            <Link className="sheet__btn" href="/#book">{t.order.bookWith}</Link>
+            <button className="sheet__clear" type="button" onClick={clearOrder}>{t.order.clear}</button>
+          </div>
+        </>
+      )}
     </dialog>
   );
 }
 
 function DishRow({ d, onZoom }: { d: Dish; onZoom: (d: Dish) => void }) {
   const { t, tx } = useT();
+  const { qtyOf } = useOrder();
   const off = d.available === false;
   const name = tx(d.name);
+  const qty = qtyOf(d.id);
   return (
     <li className={`dish${off ? " dish--off" : ""}${d.photo ? " dish--photo" : ""}`}>
       {d.photo && (
-        <button className="dish__zoom" type="button" onClick={() => onZoom(d)} aria-label={t.carte.zoom(name)}>
+        // Для клавиатуры и чтения с экрана хватает кнопки-названия, фото — дубль для пальца и мыши
+        <button className="dish__zoom" type="button" onClick={() => onZoom(d)} tabIndex={-1} aria-hidden="true">
           <img className="dish__photo" src={asset(`/menu/${d.id}.webp`)} alt=""
             width={640} height={640} loading="lazy" decoding="async" />
         </button>
       )}
       <div className="dish__row">
-        <h3 className="dish__name">{name}</h3>
+        <h3 className="dish__name">
+          <button className="dish__open" type="button" onClick={() => onZoom(d)}>{name}</button>
+        </h3>
+        {qty > 0 && <span className="dish__qty num" title={t.order.inOrder(qty)}>{qty}<span className="sr-only"> — {t.order.inOrder(qty)}</span></span>}
         {off ? <span className="dish__off">{t.carte.off}</span>
           : d.tag && <span className={`dish__tag${d.tag === "Остро" ? " dish__tag--hot" : ""}`}>{t.carte.tags[d.tag]}</span>}
         <span className="dish__lead" aria-hidden="true" />
@@ -80,7 +154,9 @@ function DishRow({ d, onZoom }: { d: Dish; onZoom: (d: Dish) => void }) {
 
 export function Carte() {
   const { t, tx } = useT();
+  const { count } = useOrder();
   const [zoom, setZoom] = useState<Dish | null>(null);
+  const [sheet, setSheet] = useState(false);
   return (
     <div className="carte">
       <LangSync title="carte" />
@@ -156,9 +232,13 @@ export function Carte() {
       </footer>
 
       {zoom && <DishZoom d={zoom} onClose={() => setZoom(null)} />}
+      {sheet && <OrderSheet onClose={() => setSheet(false)} />}
 
       <div className="carte-dock" role="group" aria-label={t.carte.dockLabel}>
-        <a className="carte-dock__order" href={whatsappLink(t.orderText)} target="_blank" rel="noopener"><Icon name="bag" />{t.carte.dockOrder}</a>
+        <button className="carte-dock__order" type="button" onClick={() => setSheet(true)}>
+          <Icon name="bag" />{t.carte.dockOrder}
+          {count > 0 && <span className="carte-dock__count num">{count}<span className="sr-only"> — {t.order.items(count)}</span></span>}
+        </button>
         <Link className="carte-dock__book" href="/#book">{t.carte.dockBook}</Link>
       </div>
     </div>

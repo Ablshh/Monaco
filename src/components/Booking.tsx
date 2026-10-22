@@ -1,15 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { formatPrice } from "@/data/menu";
 import { site, whatsappLink } from "@/data/site";
 import { useMounted } from "@/lib/useMounted";
 import { useT } from "@/i18n/lang";
 import { bookingMessage, humanDate, isoDate, slotsFor, type BookingRequest } from "@/lib/booking";
+import { orderLinesText, useOrder } from "@/lib/order";
 import { Icon } from "./Icon";
 import { SlideVideo } from "./SlideVideo";
 import { useSite } from "./SiteProvider";
 
 type Errors = Partial<Record<"name" | "phone" | "date" | "time", string>>;
+
+/** Перед отправкой брони с блюдами: гость подтверждает, что к столу нужно приготовить заказ */
+function ConfirmDishes({ items, sum, onAnswer }: { items: string; sum: string; onAnswer: (withDishes: boolean | null) => void }) {
+  const { t } = useT();
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    // Без close() при размонтировании: окно уходит из DOM само, а лишнее событие close закрыло бы следующее
+    const dlg = ref.current;
+    if (dlg && !dlg.open) dlg.showModal();
+  }, []);
+  const c = t.book.confirm;
+  return (
+    <dialog className="confirm glass--dark" ref={ref} aria-labelledby="confirm-title" data-lenis-prevent
+      onClose={() => onAnswer(null)} onClick={(e) => { if (e.target === e.currentTarget) onAnswer(null); }}>
+      <span className="order-mark order-mark--lg" aria-hidden="true">!</span>
+      <h2 className="confirm__title display" id="confirm-title">{c.title} <span className="italic">{c.titleAccent}</span></h2>
+      <p className="confirm__text">{c.text(items, sum)}</p>
+      <div className="confirm__actions">
+        <button type="button" className="btn btn--primary" onClick={() => onAnswer(true)}>{c.yes}</button>
+        <button type="button" className="btn btn--outline" onClick={() => onAnswer(false)}>{c.no}</button>
+      </div>
+    </dialog>
+  );
+}
 
 /**
  * Заявка уходит в WhatsApp ресторана: форма собирает всё в одно сообщение
@@ -17,11 +44,14 @@ type Errors = Partial<Record<"name" | "phone" | "date" | "time", string>>;
  */
 export function Booking() {
   const { prefill } = useSite();
-  const { t, locale } = useT();
+  const { t, tx, locale } = useT();
+  const { lines, count, total } = useOrder();
   const MSG = t.book.errors;
   const [form, setForm] = useState<BookingRequest>({ name: "", phone: "", date: "", time: "", guests: 2, comment: "" });
   const [errors, setErrors] = useState<Errors>({});
   const [sentUrl, setSentUrl] = useState<string | null>(null);
+  const [asking, setAsking] = useState(false);
+  const [sentWithDishes, setSentWithDishes] = useState(false);
   const mounted = useMounted();
   const today = mounted ? isoDate(new Date()) : "";
   const date = form.date || today;
@@ -57,12 +87,20 @@ export function Booking() {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    const url = whatsappLink(bookingMessage({ ...form, date, name: form.name.trim(), phone: form.phone.trim() }, t, locale));
+    // В заказе есть блюда — сначала спросим, готовить ли их к столу
+    if (count > 0) setAsking(true);
+    else send(false);
+  }
+
+  function send(withDishes: boolean) {
+    const dishes = withDishes ? orderLinesText(lines, total, t, tx) : [];
+    const url = whatsappLink(bookingMessage({ ...form, date, name: form.name.trim(), phone: form.phone.trim() }, t, locale, dishes));
     // Ссылка вместо window.open: на телефоне откроет приложение, на компьютере — новую вкладку
     const a = document.createElement("a");
     a.href = url; a.target = "_blank"; a.rel = "noopener";
     a.click();
     setSentUrl(url);
+    setSentWithDishes(withDishes);
   }
 
   return (
@@ -75,7 +113,10 @@ export function Booking() {
           <div className="booking-done" aria-live="polite">
             <Icon name="check" className="book__check" />
             <h2 className="book__title display">{t.book.doneTitle} <span className="italic">{t.book.doneAccent}</span></h2>
-            <p className="num">{humanDate(date, locale)} · {form.time} · {t.book.guestsWord(form.guests)}</p>
+            <p className="num">
+              {humanDate(date, locale)} · {form.time} · {t.book.guestsWord(form.guests)}
+              {sentWithDishes && <> · {t.order.items(count)}</>}
+            </p>
             <p className="quiet">{t.book.doneText}</p>
             <div className="book__actions">
               <a className="btn btn--primary btn--sm" href={sentUrl} target="_blank" rel="noopener">
@@ -138,6 +179,31 @@ export function Booking() {
                   value={form.comment} onChange={(e) => set("comment", e.target.value)} />
               </div>
             </div>
+            {count > 0 && (
+              <details className="book-order">
+                <summary>
+                  <span className="order-mark" title={t.book.detailsMark} aria-hidden="true">!</span>
+                  <span className="book-order__head">
+                    <span className="book-order__title">{t.book.details}</span>
+                    <span className="book-order__sum num">{t.order.items(count)} · {formatPrice(total)}</span>
+                  </span>
+                  <Icon name="chevron" className="book-order__chev" />
+                </summary>
+                <div className="book-order__body">
+                  <p className="book-order__note">{t.book.detailsNote}</p>
+                  <ul className="book-order__list">
+                    {lines.map(({ dish, qty, sum }) => (
+                      <li key={dish.id}>
+                        <span><span className="num">{qty} ×</span> {tx(dish.name)}</span>
+                        <span className="num">{formatPrice(sum)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="book-order__total"><span>{t.order.total}</span><b className="num">{formatPrice(total)}</b></p>
+                  <Link className="book-order__edit" href="/menu">{t.book.editOrder}</Link>
+                </div>
+              </details>
+            )}
             <div className="book__actions">
               <button className="btn btn--primary" type="submit"><Icon name="whatsapp" />{t.book.submit}</button>
               <p className="booking-note">{t.book.note}</p>
@@ -145,6 +211,11 @@ export function Booking() {
           </>
         )}
       </form>
+
+      {asking && (
+        <ConfirmDishes items={t.order.items(count)} sum={formatPrice(total)}
+          onAnswer={(yes) => { setAsking(false); if (yes !== null) send(yes); }} />
+      )}
 
       <dl className="book__info">
         <div><dt className="label quiet">{t.book.address}</dt><dd>{t.place.address}, {t.place.city}</dd></div>
