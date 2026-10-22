@@ -4,7 +4,6 @@ import { useSyncExternalStore } from "react";
 import { DICT } from "./dict";
 
 export type Lang = "kk" | "ru" | "en";
-/** Строка на трёх языках */
 export type Txt = Record<Lang, string>;
 
 export const LANGS: { id: Lang; short: string; name: string; locale: string }[] = [
@@ -19,7 +18,6 @@ let current: Lang | null = null;
 
 const isLang = (v: unknown): v is Lang => v === "kk" || v === "ru" || v === "en";
 
-/** Выбор гостя из браузера; при первом визите — язык системы, по умолчанию русский */
 function initial(): Lang {
   try {
     const saved = localStorage.getItem(KEY);
@@ -44,12 +42,10 @@ function subscribe(fn: () => void) {
   return () => { listeners.delete(fn); };
 }
 
-/** Текущий язык. Статическая сборка и первая отрисовка — на русском */
 export function useLang(): Lang {
   return useSyncExternalStore(subscribe, getLang, () => "ru");
 }
 
-/** Словарь текущего языка и выбор строки из { kk, ru, en } */
 export function useT() {
   const lang = useLang();
   return { lang, t: DICT[lang], tx: (x: Txt) => x[lang], locale: LANGS.find((l) => l.id === lang)!.locale };

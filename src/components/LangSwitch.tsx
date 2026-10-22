@@ -4,10 +4,6 @@ import { useEffect, useId, useRef, useState } from "react";
 import { LANGS, setLang, useT } from "@/i18n/lang";
 import { Icon } from "./Icon";
 
-/**
- * Выбор языка: компактная кнопка «🌐 РУС», по нажатию — список с полными названиями.
- * tone: dark — поверх видео на главной, light — на бумажной странице меню.
- */
 export function LangSwitch({ tone = "dark", className }: { tone?: "dark" | "light"; className?: string }) {
   const { lang, t } = useT();
   const [open, setOpen] = useState(false);
@@ -56,7 +52,6 @@ export function LangSwitch({ tone = "dark", className }: { tone?: "dark" | "ligh
   );
 }
 
-/** Три кнопки в ряд — для раскрытого меню на телефоне, где выпадающий список неудобен */
 export function LangSegments({ className }: { className?: string }) {
   const { lang, t } = useT();
   return (
@@ -71,7 +66,6 @@ export function LangSegments({ className }: { className?: string }) {
   );
 }
 
-/** Держит <html lang> и заголовок вкладки в соответствии с выбранным языком */
 export function LangSync({ title }: { title?: "site" | "carte" }) {
   const { lang, t } = useT();
   useEffect(() => {

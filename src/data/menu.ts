@@ -1,21 +1,15 @@
-// Меню ресторана. ПРИМЕР: блюда и цены условные, настоящего меню в открытом доступе нет.
-// Чтобы временно убрать блюдо из продажи, поставьте available: false —
-// оно останется в меню, но будет помечено «Временно нет».
-// Тексты на трёх языках: L("русский", "қазақша", "English").
 import type { Txt } from "@/i18n/lang";
 
 export type DishTag = "Хит" | "Шеф" | "Остро" | "Новинка";
 
 export type Dish = {
-  /** Ключ блюда; он же имя фото public/menu/<id>.webp, если photo: true */
   id: string;
   name: Txt;
   description?: Txt;
-  weight?: string; // «300 г», «150 мл», «5 шт.» — единица переводится сама
+  weight?: string;
   price: number;
   tag?: DishTag;
-  available?: boolean; // по умолчанию true
-  /** Есть фото блюда, вырезанное из фона */
+  available?: boolean;
   photo?: boolean;
 };
 

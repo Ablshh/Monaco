@@ -1,6 +1,5 @@
 "use client";
 
-// Экраны главной: витрина меню, банкеты, бар
 import Link from "next/link";
 import { Fragment } from "react";
 import { banquet, categories, formatPrice } from "@/data/menu";
@@ -9,7 +8,6 @@ import { useT } from "@/i18n/lang";
 import { Icon } from "./Icon";
 import { SlideVideo } from "./SlideVideo";
 
-/** Блюда с пометкой «Шеф» и «Хит»: сначала по одному из раздела, потом добираем до четырёх */
 function chefPicks() {
   const picks = categories.flatMap((c) =>
     c.dishes

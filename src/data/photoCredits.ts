@@ -1,4 +1,3 @@
-// Авторы фото блюд (Wikimedia Commons). Лицензии CC BY / BY-SA требуют указать автора — список выводится внизу меню.
 export type PhotoCredit = { photo: string; artist: string; license: string; page: string };
 
 export const photoCredits: PhotoCredit[] = [

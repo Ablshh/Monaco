@@ -7,12 +7,9 @@ type Props = {
   src: string;
   poster: string;
   className?: string;
-  /** Первый экран: грузить сразу. Остальные начинают грузиться, когда экран подъезжает к виду */
   eager?: boolean;
 };
 
-/** Фоновое видео экрана. Играет, только пока экран на виду; при «меньше движения» остаётся постер.
- *  Пока видео не пошло, само оно прозрачное, а видна картинка: так браузер телефона не показывает свою кнопку «play» */
 export function SlideVideo({ src, poster, className, eager = false }: Props) {
   const ref = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -20,7 +17,6 @@ export function SlideVideo({ src, poster, className, eager = false }: Props) {
     const v = ref.current;
     if (!v) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { v.pause(); return; }
-    // React не пишет атрибут muted в разметку, а без него Safari на телефоне блокирует автозапуск
     v.muted = true;
     v.defaultMuted = true;
     v.setAttribute("muted", "");
@@ -35,7 +31,6 @@ export function SlideVideo({ src, poster, className, eager = false }: Props) {
     }, { threshold: 0.05, rootMargin: eager ? "0px" : "50% 0px" });
     io.observe(v);
     if (eager) play();
-    // Если браузер всё же не дал запустить (например, режим энергосбережения) — пробуем с первым касанием
     const retry = () => { if (visible && v.paused) play(); };
     const events = ["touchend", "pointerup", "click", "keydown"] as const;
     events.forEach((e) => window.addEventListener(e, retry, { passive: true }));

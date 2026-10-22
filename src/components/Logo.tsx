@@ -1,7 +1,5 @@
 import { useId } from "react";
 
-// Знак Monaco: щит, буква M, веточки и лента. Цвет — currentColor.
-// Надпись вырезана из ленты маской, поэтому знак одноцветный на любом фоне.
 export function Logo({ className }: { className?: string }) {
   const id = useId().replace(/:/g, "");
   const arc = `arc-${id}`, cut = `cut-${id}`;

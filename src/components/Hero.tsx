@@ -8,7 +8,6 @@ import { toMin } from "@/lib/booking";
 import { Anchor } from "./Chrome";
 import { SlideVideo } from "./SlideVideo";
 
-/** Минуты с начала дня по времени ресторана */
 function restaurantMinutes(): number {
   const [h, m] = new Intl.DateTimeFormat("ru-RU", {
     timeZone: site.timeZone, hour: "2-digit", minute: "2-digit", hourCycle: "h23",
@@ -16,10 +15,8 @@ function restaurantMinutes(): number {
   return h * 60 + m;
 }
 
-/** «Сейчас открыто» или «Закрыто»: зависит от текущего времени, поэтому только в браузере */
 function OpenStatus() {
   const { t } = useT();
-  // null до первого замера: при статической сборке время неизвестно
   const [now, setNow] = useState<number | null>(null);
   useEffect(() => {
     const tick = () => setNow(restaurantMinutes());

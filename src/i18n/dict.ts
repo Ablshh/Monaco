@@ -1,4 +1,3 @@
-// Тексты интерфейса на трёх языках. Блюда и банкетные сеты переведены прямо в data/menu.ts
 import type { Lang } from "./lang";
 
 function ruPlural(n: number, one: string, few: string, many: string): string {
@@ -469,7 +468,6 @@ const en: Dict = {
 
 export const DICT: Record<Lang, Dict> = { kk, ru, en };
 
-/** «300 г» → «300 g» и т. п.: число остаётся, единица переводится */
 export function localizeWeight(w: string, d: Dict): string {
   return w.replace(/(шт\.|кг|мл|г|л)$/u, (u) => d.units[u] ?? u);
 }

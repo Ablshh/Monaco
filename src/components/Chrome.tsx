@@ -9,7 +9,6 @@ import { LangSegments, LangSwitch } from "./LangSwitch";
 import { Logo } from "./Logo";
 import { useSite } from "./SiteProvider";
 
-/** Ссылка на экран страницы: прокручивает плавно, без перезагрузки */
 export function Anchor({ to, className, children, onGo, ...rest }:
   { to: string; className?: string; children?: React.ReactNode; onGo?: () => void } & React.AriaAttributes) {
   const { scrollToId } = useSite();
@@ -95,7 +94,6 @@ export function Header() {
   );
 }
 
-/** Отдельная кнопка меню: всегда в правом нижнем углу */
 export function MenuFab() {
   const { t } = useT();
   return (

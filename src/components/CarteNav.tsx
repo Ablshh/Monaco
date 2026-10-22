@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 
-/** Липкая полоса разделов меню: подсвечивает раздел, который сейчас читают.
- *  Когда полоса прилипла к верху, слева появляется «На сайт» — верхняя строка уже уехала */
 export function CarteNav({ items, label, back }: { items: { id: string; title: string }[]; label: string; back: string }) {
   const [current, setCurrent] = useState(-1);
   const [stuck, setStuck] = useState(false);
@@ -28,7 +26,6 @@ export function CarteNav({ items, label, back }: { items: { id: string; title: s
     return () => window.removeEventListener("scroll", spy);
   }, [items]);
 
-  // Активный пункт держим в центре полосы, когда она прокручивается вбок
   useEffect(() => {
     const track = trackRef.current, a = track?.children[current] as HTMLElement | undefined;
     if (!track || !a) return;

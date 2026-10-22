@@ -1,4 +1,3 @@
-// Иконки одной толщины линии, авторские SVG
 const paths = {
   arrow: <path d="M2 12h36M31 5l7 7-7 7" />,
   "arrow-short": <path d="M5 12h14M13 6l6 6-6 6" />,

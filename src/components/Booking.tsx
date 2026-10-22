@@ -14,12 +14,10 @@ import { useSite } from "./SiteProvider";
 
 type Errors = Partial<Record<"name" | "phone" | "date" | "time", string>>;
 
-/** Перед отправкой брони с блюдами: гость подтверждает, что к столу нужно приготовить заказ */
 function ConfirmDishes({ items, sum, onAnswer }: { items: string; sum: string; onAnswer: (withDishes: boolean | null) => void }) {
   const { t } = useT();
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    // Без close() при размонтировании: окно уходит из DOM само, а лишнее событие close закрыло бы следующее
     const dlg = ref.current;
     if (dlg && !dlg.open) dlg.showModal();
   }, []);
@@ -38,10 +36,6 @@ function ConfirmDishes({ items, sum, onAnswer }: { items: string; sum: string; o
   );
 }
 
-/**
- * Заявка уходит в WhatsApp ресторана: форма собирает всё в одно сообщение
- * и открывает чат, гостю остаётся нажать «Отправить».
- */
 export function Booking() {
   const { prefill } = useSite();
   const { t, tx, locale } = useT();
@@ -56,7 +50,6 @@ export function Booking() {
   const today = mounted ? isoDate(new Date()) : "";
   const date = form.date || today;
 
-  // Перенос выбора из быстрой брони и со стола в зале: применяем, когда приходит новая отметка
   const [seenStamp, setSeenStamp] = useState(0);
   if (prefill.stamp !== seenStamp) {
     setSeenStamp(prefill.stamp);
@@ -87,7 +80,6 @@ export function Booking() {
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    // В заказе есть блюда — сначала спросим, готовить ли их к столу
     if (count > 0) setAsking(true);
     else send(false);
   }
@@ -95,7 +87,6 @@ export function Booking() {
   function send(withDishes: boolean) {
     const dishes = withDishes ? orderLinesText(lines, total, t, tx) : [];
     const url = whatsappLink(bookingMessage({ ...form, date, name: form.name.trim(), phone: form.phone.trim() }, t, locale, dishes));
-    // Ссылка вместо window.open: на телефоне откроет приложение, на компьютере — новую вкладку
     const a = document.createElement("a");
     a.href = url; a.target = "_blank"; a.rel = "noopener";
     a.click();

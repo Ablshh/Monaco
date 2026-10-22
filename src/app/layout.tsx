@@ -4,7 +4,7 @@ import "lenis/dist/lenis.css";
 import "@/styles/base.css";
 
 const cormorant = Cormorant_Garamond({
-  subsets: ["latin", "cyrillic", "cyrillic-ext"], // cyrillic-ext — казахские ә, ғ, қ, ң, ө, ұ, ү, і
+  subsets: ["latin", "cyrillic", "cyrillic-ext"],
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
   variable: "--font-cormorant",

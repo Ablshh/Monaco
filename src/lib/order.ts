@@ -5,7 +5,6 @@ import { categories, formatPrice, type Dish } from "@/data/menu";
 import type { Dict } from "@/i18n/dict";
 import type { Txt } from "@/i18n/lang";
 
-/** Заказ гостя: блюда и количество. Хранится в браузере, общий для меню и главной */
 export type OrderItem = { id: string; qty: number };
 export type OrderLine = { dish: Dish; qty: number; sum: number };
 
@@ -20,7 +19,6 @@ function read(): OrderItem[] {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) || "[]");
     if (!Array.isArray(raw)) return EMPTY;
-    // Блюдо могли убрать из меню или снять с продажи — такие строки не показываем
     return raw.filter((x): x is OrderItem =>
       typeof x?.id === "string" && Number.isInteger(x?.qty) && x.qty > 0 && DISHES.get(x.id)?.available !== false);
   } catch {
@@ -40,7 +38,6 @@ function write(next: OrderItem[]) {
 
 function subscribe(fn: () => void) {
   listeners.add(fn);
-  // Заказ, изменённый в другой вкладке
   const onStorage = (e: StorageEvent) => { if (e.key === KEY) { current = null; fn(); } };
   window.addEventListener("storage", onStorage);
   return () => { listeners.delete(fn); window.removeEventListener("storage", onStorage); };
@@ -59,7 +56,6 @@ export function clearOrder() {
   write(EMPTY);
 }
 
-/** Строки заказа с блюдами и суммами. Статическая сборка и первая отрисовка — пустой заказ */
 export function useOrder() {
   const items = useSyncExternalStore(subscribe, get, () => EMPTY);
   const lines: OrderLine[] = items.flatMap(({ id, qty }) => {
@@ -74,7 +70,6 @@ export function useOrder() {
   };
 }
 
-/** Строки заказа для сообщения в WhatsApp: «2 × Бешбармак — 9 000 ₸» и итог */
 export function orderLinesText(lines: OrderLine[], total: number, d: Dict, tx: (x: Txt) => string): string[] {
   return [
     ...lines.map((l) => `${l.qty} × ${tx(l.dish.name)} — ${formatPrice(l.sum)}`),

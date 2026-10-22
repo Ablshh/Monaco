@@ -7,10 +7,8 @@ import type { BookingRequest } from "@/lib/booking";
 type Prefill = Partial<Pick<BookingRequest, "date" | "time" | "guests" | "comment">>;
 
 type SiteContext = {
-  /** id экрана, который сейчас на виду */
   active: string;
   scrollToId: (id: string) => void;
-  /** Заполнить форму брони и прокрутить к ней */
   goBook: (prefill?: Prefill) => void;
   prefill: Prefill & { stamp: number };
 };
@@ -32,7 +30,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
   const [active, setActive] = useState("home");
   const [prefill, setPrefill] = useState<SiteContext["prefill"]>({ stamp: 0 });
 
-  /* Плавная прокрутка без магнита к экранам */
   useEffect(() => {
     if (prefersReducedMotion()) return;
     const lenis = new Lenis({ duration: 1.2, easing: (t) => 1 - Math.pow(1 - t, 4), smoothWheel: true });
@@ -48,7 +45,6 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  /* Активный экран: подсветка в шапке и точках, приближение фото */
   useEffect(() => {
     const slides = Array.from(document.querySelectorAll<HTMLElement>("[data-slide]"));
     const io = new IntersectionObserver(

@@ -22,7 +22,6 @@ export function slots(): string[] {
   return out;
 }
 
-/** Свободные на выбранный день слоты: сегодня — только те, что ещё не прошли */
 export function slotsFor(dateIso: string, now = new Date()): string[] {
   if (dateIso !== isoDate(now)) return slots();
   const nowMin = now.getHours() * 60 + now.getMinutes();
@@ -44,8 +43,6 @@ export type BookingRequest = {
   comment?: string;
 };
 
-/** Текст заявки, который гость отправляет в WhatsApp ресторана — на языке сайта.
- *  orderLines — блюда из заказа, которые гость попросил приготовить к столу */
 export function bookingMessage(b: BookingRequest, d: Dict, locale: string, orderLines: string[] = []): string {
   const m = d.book.msg;
   return [

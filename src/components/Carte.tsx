@@ -15,11 +15,9 @@ import { LangSwitch, LangSync } from "./LangSwitch";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
-/** Окно на <dialog>: открыто, пока смонтировано; Esc и нажатие на фон закрывают */
 function useModal(onClose: () => void) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    // Без close() при размонтировании: окно уходит из DOM само, а лишнее событие close закрыло бы следующее
     const dlg = ref.current;
     if (dlg && !dlg.open) dlg.showModal();
   }, []);
@@ -29,7 +27,6 @@ function useModal(onClose: () => void) {
   };
 }
 
-/** Порции блюда в заказе: − 2 + */
 function Qty({ d, qty }: { d: Dish; qty: number }) {
   const { t, tx } = useT();
   return (
@@ -41,7 +38,6 @@ function Qty({ d, qty }: { d: Dish; qty: number }) {
   );
 }
 
-/** Блюдо крупно: что это, из чего, сколько стоит — и добавить в заказ */
 function DishZoom({ d, onClose }: { d: Dish; onClose: () => void }) {
   const { t, tx } = useT();
   const { qtyOf } = useOrder();
@@ -77,7 +73,6 @@ function DishZoom({ d, onClose }: { d: Dish; onClose: () => void }) {
   );
 }
 
-/** Заказ гостя: блюда, порции, итог; заказать в WhatsApp или забронировать стол с этими блюдами */
 function OrderSheet({ onClose }: { onClose: () => void }) {
   const { t, tx } = useT();
   const { lines, total } = useOrder();
@@ -123,7 +118,6 @@ function DishRow({ d, onZoom }: { d: Dish; onZoom: (d: Dish) => void }) {
   return (
     <li className={`dish${off ? " dish--off" : ""}${d.photo ? " dish--photo" : ""}`}>
       {d.photo && (
-        // Для клавиатуры и чтения с экрана хватает кнопки-названия, фото — дубль для пальца и мыши
         <button className="dish__zoom" type="button" onClick={() => onZoom(d)} tabIndex={-1} aria-hidden="true">
           <img className="dish__photo" src={asset(`/menu/${d.id}.webp`)} alt=""
             width={640} height={640} loading="lazy" decoding="async" />
