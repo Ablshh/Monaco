@@ -79,6 +79,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 img, svg, video { display: block; max-width: 100%; }
+/* Фоновое видео прозрачно, пока не пошло: поверх лежит постер, и системной кнопки «play» не видно */
+.slide-video:not(.is-playing) { opacity: .01 !important; } /* не 0: Safari может не запускать невидимое видео */
+.slide-poster { position: absolute; inset: 0; pointer-events: none; transition: opacity .6s; }
+.slide-video.is-playing + .slide-poster { opacity: 0 !important; }
+video::-webkit-media-controls-start-playback-button { display: none !important; -webkit-appearance: none; }
+video::-webkit-media-controls { display: none !important; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; padding: 0; }
 a { color: inherit; text-decoration: none; }
@@ -276,3 +282,62 @@ input[type="date"].field__input::-webkit-calendar-picker-indicator { opacity: .8
     transition-duration: .01ms !important; scroll-behavior: auto !important;
   }
 }
+
+/* ---------- Выбор языка ---------- */
+/* Кнопка «🌐 РУС ⌄» в духе капсулы «Заказать | Забронировать», список — тёмное стекло */
+.lang { position: relative; }
+.lang__btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px 0 13px;
+  border-radius: var(--radius-pill); border: 1px solid var(--glass-stroke);
+  background: rgba(31,3,5,.28); color: var(--ivory-100);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  font-size: 12px; font-weight: 500; letter-spacing: .14em; line-height: 1;
+  transition: background var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.lang__btn:hover, .lang__btn[aria-expanded="true"] { background: var(--glass-fill-strong); border-color: rgba(251,248,243,.4); }
+.lang__btn .icon { width: 16px; height: 16px; }
+.lang__btn .icon--chevron { width: 14px; height: 14px; opacity: .7; transition: transform var(--dur-base) var(--ease-out); }
+.lang__btn[aria-expanded="true"] .icon--chevron { transform: rotate(180deg); }
+
+.lang__menu {
+  position: absolute; top: calc(100% + 10px); right: 0; z-index: 60; min-width: 196px;
+  display: grid; gap: 2px; padding: 6px; border-radius: var(--radius-md);
+  background: rgba(31,3,5,.9); border: 1px solid rgba(251,248,243,.16);
+  -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  box-shadow: 0 24px 48px -18px rgba(0,0,0,.6);
+  transform-origin: top right; animation: langIn .28s var(--ease-out);
+}
+@keyframes langIn { from { opacity: 0; transform: translateY(-6px) scale(.97); } }
+.lang__menu button {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  padding: 11px 14px; border-radius: var(--radius-sm);
+  font-size: 14px; color: var(--ivory-300); text-align: left;
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.lang__menu button:hover { background: rgba(251,248,243,.08); color: var(--ivory-50); }
+.lang__name { display: inline-flex; align-items: center; gap: 10px; }
+.lang__name::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: transparent; transition: background var(--dur-fast); }
+.lang__menu button[aria-current="true"] { color: var(--ivory-50); }
+.lang__menu button[aria-current="true"] .lang__name::before { background: var(--gold-400); }
+.lang__short { font-size: 11px; font-weight: 500; letter-spacing: .14em; color: var(--ivory-500); }
+
+/* Светлый вариант — для бумажной страницы меню */
+.lang--light .lang__btn {
+  background: transparent; border-color: rgba(82,10,15,.24); color: var(--rouge-800);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.lang--light .lang__btn:hover, .lang--light .lang__btn[aria-expanded="true"] { background: rgba(82,10,15,.06); border-color: rgba(82,10,15,.4); }
+.lang--light .lang__menu { background: #FBF8F3; border-color: rgba(82,10,15,.14); box-shadow: 0 24px 48px -20px rgba(31,3,5,.35); }
+.lang--light .lang__menu button { color: #6A5A52; }
+.lang--light .lang__menu button:hover { background: rgba(82,10,15,.06); color: var(--ink-900); }
+.lang--light .lang__menu button[aria-current="true"] { color: var(--rouge-800); }
+.lang--light .lang__short { color: #9A8A80; }
+
+/* Три кнопки в ряд — в раскрытом меню на телефоне */
+.lang-seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: var(--radius-pill); border: 1px solid rgba(251,248,243,.18); }
+.lang-seg button {
+  height: 40px; padding: 0 18px; border-radius: var(--radius-pill);
+  font-size: 12px; font-weight: 500; letter-spacing: .14em; color: var(--ivory-300);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.lang-seg button[aria-pressed="true"] { background: var(--ivory-50); color: var(--ink-900); }

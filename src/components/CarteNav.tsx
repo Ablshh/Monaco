@@ -1,10 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { Icon } from "@/components/Icon";
 
-/** Липкая полоса разделов меню: подсвечивает раздел, который сейчас читают */
-export function CarteNav({ items }: { items: { id: string; title: string }[] }) {
+/** Липкая полоса разделов меню: подсвечивает раздел, который сейчас читают.
+ *  Когда полоса прилипла к верху, слева появляется «На сайт» — верхняя строка уже уехала */
+export function CarteNav({ items, label, back }: { items: { id: string; title: string }[]; label: string; back: string }) {
   const [current, setCurrent] = useState(-1);
+  const [stuck, setStuck] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -15,6 +20,8 @@ export function CarteNav({ items }: { items: { id: string; title: string }[] }) 
         if (el && el.getBoundingClientRect().top <= 140) idx = i;
       });
       setCurrent(idx);
+      const nav = navRef.current;
+      setStuck(!!nav && window.scrollY > 0 && nav.getBoundingClientRect().top <= 0);
     };
     spy();
     window.addEventListener("scroll", spy, { passive: true });
@@ -30,7 +37,10 @@ export function CarteNav({ items }: { items: { id: string; title: string }[] }) 
   }, [current]);
 
   return (
-    <nav className="carte-nav" aria-label="Разделы меню">
+    <nav className={`carte-nav${stuck ? " is-stuck" : ""}`} aria-label={label} ref={navRef}>
+      <Link className="carte-nav__back" href="/" aria-hidden={!stuck} tabIndex={stuck ? undefined : -1}>
+        <Icon name="arrow-left" /><span>{back}</span>
+      </Link>
       <div className="carte-nav__track" ref={trackRef}>
         {items.map((it, i) => (
           <a key={it.id} href={"#" + it.id} className={i === current ? "is-active" : undefined}

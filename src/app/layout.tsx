@@ -4,14 +4,14 @@ import "lenis/dist/lenis.css";
 import "@/styles/base.css";
 
 const cormorant = Cormorant_Garamond({
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin", "cyrillic", "cyrillic-ext"], // cyrillic-ext — казахские ә, ғ, қ, ң, ө, ұ, ү, і
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
   variable: "--font-cormorant",
   display: "swap",
 });
 const inter = Inter({
-  subsets: ["latin", "cyrillic"],
+  subsets: ["latin", "cyrillic", "cyrillic-ext"],
   weight: ["300", "400", "500"],
   variable: "--font-inter",
   display: "swap",

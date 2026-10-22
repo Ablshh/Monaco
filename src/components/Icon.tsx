@@ -8,6 +8,13 @@ const paths = {
   minus: <path d="M5 12h14" />,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
   menu: <path d="M4 9h16M4 15h16" />,
+  chevron: <path d="m7 10 5 5 5-5" />,
+  globe: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M3.5 12h17M12 3.5c2.4 2.5 3.5 5.3 3.5 8.5s-1.1 6-3.5 8.5c-2.4-2.5-3.5-5.3-3.5-8.5s1.1-6 3.5-8.5z" />
+    </>
+  ),
   whatsapp: (
     <>
       <path d="M4 20l1.3-3.9A8.5 8.5 0 1 1 8 18.8L4 20z" />

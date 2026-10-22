@@ -25,8 +25,9 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
 .carte-top__logo { display: flex; align-items: center; gap: 10px; color: var(--accent); }
 .carte-top__mark { width: 26px; height: auto; }
 .carte-top__logo span { font-family: var(--font-display); font-size: 22px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; }
+.carte-top__end { justify-self: end; display: flex; align-items: center; gap: 12px; }
 .carte-top__book {
-  justify-self: end; display: inline-flex; align-items: center; height: 40px; padding: 0 20px;
+  display: inline-flex; align-items: center; height: 40px; padding: 0 20px;
   border-radius: var(--radius-pill); border: 1px solid var(--accent); color: var(--accent);
   font-size: 13px; font-weight: 500; transition: background var(--dur-fast), color var(--dur-fast);
 }
@@ -34,7 +35,6 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
 
 /* ---------- Обложка ---------- */
 .carte-cover { display: grid; justify-items: center; text-align: center; padding: clamp(48px, 9vh, 96px) var(--gutter) clamp(36px, 6vh, 64px); }
-.carte-cover__mark { width: clamp(84px, 9vw, 120px); height: auto; margin-bottom: 20px; }
 .carte-cover__title { font-size: clamp(72px, 11vw, 168px); line-height: .85; color: var(--accent); font-weight: 500; }
 .carte-cover__sub { margin-top: 10px; font-size: clamp(22px, 2.4vw, 32px); color: var(--ink); }
 .carte-cover__note { margin-top: 18px; font-size: 14px; color: var(--ink-soft); }
@@ -45,25 +45,37 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
   background: rgba(246,241,233,.92);
   -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
   border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  display: flex; align-items: stretch;
 }
+/* «На сайт» выезжает слева, только когда полоса прилипла */
+.carte-nav__back {
+  flex: none; display: inline-flex; align-items: center; gap: 8px;
+  max-width: 0; padding: 0; overflow: hidden; white-space: nowrap; opacity: 0;
+  font-size: 13px; font-weight: 500; color: var(--accent);
+  border-right: 1px solid transparent;
+  transition: max-width var(--dur-base) var(--ease-out), padding var(--dur-base) var(--ease-out), opacity var(--dur-fast);
+}
+.carte-nav__back .icon { width: 18px; height: 18px; flex: none; }
+.carte-nav.is-stuck .carte-nav__back { max-width: 240px; padding: 0 20px 0 var(--gutter); opacity: 1; border-right-color: var(--rule); }
+.carte-nav__back:hover { color: var(--ink); }
 .carte-nav__track {
-  display: flex; padding: 0 var(--gutter);
+  flex: 1; min-width: 0; display: flex; padding: 0 var(--gutter);
   overflow-x: auto; scrollbar-width: none;
 }
 .carte-nav__track::-webkit-scrollbar { display: none; }
 /* По центру, пока помещается; когда не помещается — прокрутка без обрезки слева */
-.carte-nav a:first-child { margin-left: auto; }
-.carte-nav a:last-child { margin-right: auto; }
-.carte-nav a {
+.carte-nav__track a:first-child { margin-left: auto; }
+.carte-nav__track a:last-child { margin-right: auto; }
+.carte-nav__track a {
   position: relative; flex: none; padding: 20px 18px;
   font-size: 13px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft);
   transition: color var(--dur-fast);
 }
-.carte-nav a + a::before { content: ""; position: absolute; left: 0; top: 50%; height: 14px; margin-top: -7px; width: 1px; background: var(--rule); }
-.carte-nav a::after { content: ""; position: absolute; left: 18px; right: 18px; bottom: -1px; height: 2px; background: var(--accent); transform: scaleX(0); transition: transform var(--dur-base) var(--ease-out); }
-.carte-nav a:hover { color: var(--ink); }
-.carte-nav a.is-active { color: var(--accent); }
-.carte-nav a.is-active::after { transform: scaleX(1); }
+.carte-nav__track a + a::before { content: ""; position: absolute; left: 0; top: 50%; height: 14px; margin-top: -7px; width: 1px; background: var(--rule); }
+.carte-nav__track a::after { content: ""; position: absolute; left: 18px; right: 18px; bottom: -1px; height: 2px; background: var(--accent); transform: scaleX(0); transition: transform var(--dur-base) var(--ease-out); }
+.carte-nav__track a:hover { color: var(--ink); }
+.carte-nav__track a.is-active { color: var(--accent); }
+.carte-nav__track a.is-active::after { transform: scaleX(1); }
 
 /* ---------- Блюда ---------- */
 .carte-body { max-width: 1180px; margin: 0 auto; padding: 0 var(--gutter); }
@@ -79,7 +91,22 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
 
 .dishes { display: grid; }
 .dish { padding: 18px 0; border-top: 1px solid var(--rule); }
+/* С фото: блюдо «лежит» на бумаге слева, текст справа по центру */
+.dish--photo {
+  display: grid; grid-template-columns: 124px minmax(0, 1fr); column-gap: 28px; align-items: center;
+  padding: 14px 0;
+}
+.dish--photo .dish__row, .dish--photo .dish__meta { grid-column: 2; }
+.dish--photo .dish__row { align-self: end; }
+.dish--photo .dish__meta { align-self: start; }
+.dish__photo {
+  grid-row: 1 / span 2; width: 124px; height: 124px; object-fit: contain;
+  filter: drop-shadow(0 12px 14px rgba(30,13,13,.16)) drop-shadow(0 2px 3px rgba(30,13,13,.12));
+  transition: transform .6s var(--ease-out);
+}
+.dish--photo:hover .dish__photo { transform: scale(1.07) rotate(-2deg); }
 .dish:first-child { border-top: 0; padding-top: 4px; }
+.dish--photo:first-child { padding-top: 0; }
 .dish__row { display: flex; align-items: baseline; gap: 12px; }
 .dish__name { flex: 0 1 auto; min-width: 0; font-family: var(--font-display); font-size: 24px; font-weight: 500; line-height: 1.2; }
 .dish__tag {
@@ -122,6 +149,10 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
 .carte-foot { padding: 32px var(--gutter) 120px; text-align: center; font-size: 14px; color: var(--ink-soft); display: grid; gap: 8px; }
 .carte-foot a { color: var(--ink); }
 .carte-foot__demo { font-size: 12px; }
+.carte-credits { font-size: 12px; }
+.carte-credits summary { cursor: pointer; width: max-content; margin: 0 auto; }
+.carte-credits ul { max-width: 760px; margin: 10px auto 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; }
+.carte-credits a { color: var(--ink-soft); text-decoration: underline; text-underline-offset: 2px; }
 
 /* Заказ и бронь всегда под рукой: капсула внизу по центру */
 .carte-dock {
@@ -154,13 +185,28 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
 @media (max-width: 560px) {
   .carte-top { height: 60px; padding: 0 16px; }
   .carte-top__back span { display: none; }
-  .carte-top__book { height: 36px; padding: 0 14px; font-size: 12px; }
+  /* Бронь на телефоне — в нижней капсуле, сверху остаётся только язык */
+  .carte-top__book { display: none; }
+  .carte-top__end { gap: 8px; }
+  .carte-top__end .lang__btn { height: 36px; padding: 0 10px; gap: 6px; }
+  .carte-top__end .lang__btn .icon--globe { display: none; }
   .carte-top__logo span { font-size: 18px; }
-  .carte-nav a { padding: 16px 14px; font-size: 12px; }
-  .carte-nav a::after { left: 14px; right: 14px; }
+  .carte-nav__track a { padding: 16px 14px; font-size: 12px; }
+  .carte-nav.is-stuck .carte-nav__back { padding: 0 14px 0 16px; }
+  .carte-nav__track a::after { left: 14px; right: 14px; }
   .carte-body { padding: 0 16px; }
   .dish__name, .dish__price { font-size: 21px; }
   .dish__meta { flex-wrap: wrap; }
+  .dish--photo { grid-template-columns: 84px minmax(0, 1fr); column-gap: 16px; }
+  .dish__photo { width: 84px; height: 84px; }
+  .dish--photo .dish__name, .dish--photo .dish__price { font-size: 19px; }
+  .dish--photo .dish__meta { flex-direction: column; gap: 2px; }
+  .dish--photo .dish__w::before { content: none; margin: 0; }
+  /* Метка уходит на свою строку, чтобы не сжимать название */
+  .dish__row { flex-wrap: wrap; row-gap: 6px; }
+  .dish__name { flex: 1 1 calc(100% - 120px); }
+  .dish__lead { display: none; }
+  .dish__tag, .dish__off { order: 3; }
   .banquet { padding-left: 16px; padding-right: 16px; }
   .banquet__cta { width: 100%; }
   .carte-dock { left: 12px; right: 12px; transform: none; }
@@ -169,6 +215,7 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
 
 /* Временно нет в наличии: блюдо остаётся в меню, но приглушено */
 .dish--off .dish__name, .dish--off .dish__meta { color: var(--ink-soft); }
+.dish--off .dish__photo { opacity: .45; filter: grayscale(1); }
 .dish--off .dish__price { color: var(--ink-soft); text-decoration: line-through; text-decoration-thickness: 1px; font-weight: 500; }
 .dish__off {
   flex: none; align-self: center; padding: 4px 11px; border-radius: var(--radius-pill);

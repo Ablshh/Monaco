@@ -1,4 +1,5 @@
 import { site } from "@/data/site";
+import type { Dict } from "@/i18n/dict";
 
 export function pad(n: number): string {
   return (n < 10 ? "0" : "") + n;
@@ -28,19 +29,10 @@ export function slotsFor(dateIso: string, now = new Date()): string[] {
   return slots().filter((t) => toMin(t) > nowMin);
 }
 
-export function plural(n: number, one: string, few: string, many: string): string {
-  const a = n % 10, b = n % 100;
-  if (a === 1 && b !== 11) return one;
-  if (a >= 2 && a <= 4 && (b < 12 || b > 14)) return few;
-  return many;
-}
-export function guestsWord(n: number): string {
-  return `${n} ${plural(n, "гость", "гостя", "гостей")}`;
-}
-export function humanDate(iso: string): string {
+export function humanDate(iso: string, locale: string): string {
   if (!iso) return "";
   const [y, m, d] = iso.split("-").map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString("ru-RU", { weekday: "long", day: "numeric", month: "long" });
+  return new Date(y, m - 1, d).toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" });
 }
 
 export type BookingRequest = {
@@ -52,16 +44,17 @@ export type BookingRequest = {
   comment?: string;
 };
 
-/** Текст заявки, который гость отправляет в WhatsApp ресторана */
-export function bookingMessage(b: BookingRequest): string {
+/** Текст заявки, который гость отправляет в WhatsApp ресторана — на языке сайта */
+export function bookingMessage(b: BookingRequest, d: Dict, locale: string): string {
+  const m = d.book.msg;
   return [
-    `Здравствуйте! Хочу забронировать стол в ${site.name}.`,
+    m.hello,
     "",
-    `Имя: ${b.name}`,
-    `Телефон: ${b.phone}`,
-    `Дата: ${humanDate(b.date)}`,
-    `Время: ${b.time}`,
-    `Гостей: ${b.guests}`,
-    ...(b.comment ? [`Пожелание: ${b.comment}`] : []),
+    `${m.name}: ${b.name}`,
+    `${m.phone}: ${b.phone}`,
+    `${m.date}: ${humanDate(b.date, locale)}`,
+    `${m.time}: ${b.time}`,
+    `${m.guests}: ${b.guests}`,
+    ...(b.comment ? [`${m.wish}: ${b.comment}`] : []),
   ].join("\n");
 }

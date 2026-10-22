@@ -1,21 +1,23 @@
-// Статичные экраны главной: витрина меню, банкеты, бар
+"use client";
+
+// Экраны главной: витрина меню, банкеты, бар
 import Link from "next/link";
 import { Fragment } from "react";
 import { banquet, categories, formatPrice } from "@/data/menu";
 import { whatsappLink } from "@/data/site";
-import { asset } from "@/lib/asset";
-import { plural } from "@/lib/booking";
+import { useT } from "@/i18n/lang";
 import { Icon } from "./Icon";
+import { SlideVideo } from "./SlideVideo";
 
 /** Блюда с пометкой «Шеф» и «Хит»: сначала по одному из раздела, потом добираем до четырёх */
 function chefPicks() {
   const picks = categories.flatMap((c) =>
     c.dishes
       .filter((d) => (d.tag === "Шеф" || d.tag === "Хит") && d.available !== false)
-      .map((d) => ({ cat: c.title, dish: d })),
+      .map((d) => ({ cat: c, dish: d })),
   );
   const seen = new Set<string>();
-  const first = picks.filter((p) => !seen.has(p.cat) && seen.add(p.cat));
+  const first = picks.filter((p) => !seen.has(p.cat.id) && seen.add(p.cat.id));
   const rest = picks.filter((p) => !first.includes(p));
   return [...first, ...rest].slice(0, 4);
 }
@@ -27,30 +29,29 @@ const Ornament = () => (
 );
 
 export function MenuShowcase() {
+  const { t, tx } = useT();
   const total = categories.reduce((n, c) => n + c.dishes.length, 0);
   const marquee = [0, 1, 2, 3].flatMap((k) =>
-    categories.map((c) => <Fragment key={k + c.id}><span>{c.title}</span><Ornament /></Fragment>),
+    categories.map((c) => <Fragment key={k + c.id}><span>{tx(c.title)}</span><Ornament /></Fragment>),
   );
   return (
-    <section className="slide menu" id="menu" data-slide aria-label="Меню">
-      <div className="menu__bg" aria-hidden="true"><img src={asset("/img/m-plate.jpg")} alt="" loading="lazy" /></div>
-      <p className="label menu__kicker">Выбор шефа</p>
-      <h2 className="menu__title display">Меню <span className="italic">Monaco</span></h2>
+    <section className="slide menu" id="menu" data-slide aria-label={t.showcase.title}>
+      <div className="menu__bg" aria-hidden="true"><SlideVideo src="/video/menu.mp4" poster="/video/menu-poster.jpg" /></div>
+      <p className="label menu__kicker">{t.showcase.kicker}</p>
+      <h2 className="menu__title display">{t.showcase.title} <span className="italic">Monaco</span></h2>
       <div className="menu__cols">
         {chefPicks().map(({ cat, dish }) => (
-          <article className="menu__col" key={dish.name}>
-            <span className="label">{cat}</span>
-            <h3>{dish.name}</h3>
-            <p>{dish.description}</p>
+          <article className="menu__col" key={dish.id}>
+            <span className="label">{tx(cat.title)}</span>
+            <h3>{tx(dish.name)}</h3>
+            <p>{dish.description && tx(dish.description)}</p>
             <span className="price num">{formatPrice(dish.price)}</span>
           </article>
         ))}
       </div>
       <div className="menu__actions">
-        <Link className="btn btn--primary" href="/menu"><Icon name="book" />Открыть всё меню</Link>
-        <span className="quiet menu__count">
-          {categories.length} разделов · {total} {plural(total, "позиция", "позиции", "позиций")}
-        </span>
+        <Link className="btn btn--primary" href="/menu"><Icon name="book" />{t.showcase.openAll}</Link>
+        <span className="quiet menu__count">{t.showcase.count(categories.length, total)}</span>
       </div>
       <div className="marquee" aria-hidden="true"><div className="marquee__track">{marquee}</div></div>
     </section>
@@ -58,61 +59,68 @@ export function MenuShowcase() {
 }
 
 export function Events() {
+  const { t } = useT();
   const cheapest = Math.min(...banquet.sets.map((s) => s.price));
   return (
-    <section className="slide events grain" id="events" data-slide aria-label="Банкеты и посиделки">
+    <section className="slide events grain" id="events" data-slide aria-label={t.events.aria}>
       <div className="slide__media">
-        <img src={asset("/img/m-table.jpg")} alt="Стол сверху: стейки, салаты, вино, гости поднимают бокалы" loading="lazy" />
+        <SlideVideo src="/video/events.mp4" poster="/video/events-poster.jpg" />
       </div>
       <div className="events__shade" aria-hidden="true" />
 
       <div className="events__head">
-        <p className="label quiet">Банкеты и посиделки</p>
-        <h2 className="events__title display">Праздник <span className="italic">на весь стол</span></h2>
+        <p className="label quiet">{t.events.kicker}</p>
+        <h2 className="events__title display">{t.events.title} <span className="italic">{t.events.titleAccent}</span></h2>
       </div>
       <p className="events__big display num" aria-hidden="true">{banquet.maxGuests}</p>
 
       <ul className="events__list">
-        <li>
-          <span className="events__num label num">6–15 гостей</span>
-          <h3>Посиделки</h3>
-          <p>Общий стол, бешбармак на&nbsp;табаке, чай без счёта.</p>
-        </li>
-        <li>
-          <span className="events__num label num">до 25 гостей</span>
-          <h3>Дни рождения</h3>
-          <p>Торт под ваше событие, оформление зала, своя музыка.</p>
-        </li>
-        <li>
-          <span className="events__num label num">до {banquet.maxGuests} гостей</span>
-          <h3>Банкеты и тои</h3>
-          <p>Сеты от&nbsp;{formatPrice(cheapest)} за&nbsp;гостя, ведущий по&nbsp;договорённости.</p>
-        </li>
+        {t.events.items(banquet.maxGuests, formatPrice(cheapest)).map((it) => (
+          <li key={it.title}>
+            <span className="events__num label num">{it.num}</span>
+            <h3>{it.title}</h3>
+            <p>{it.text}</p>
+          </li>
+        ))}
       </ul>
 
       <div className="events__actions">
         <a className="btn btn--primary" target="_blank" rel="noopener"
-          href={whatsappLink("Здравствуйте! Хотим банкет в Monaco. Дата: , гостей: .")}>
-          <Icon name="whatsapp" />Обсудить банкет
+          href={whatsappLink(t.events.waText)}>
+          <Icon name="whatsapp" />{t.events.discuss}
         </a>
-        <Link className="btn btn--glass" href="/menu#banquet">Банкетное меню <Icon name="arrow-short" /></Link>
+        <Link className="btn btn--glass" href="/menu#banquet">{t.events.banquetMenu} <Icon name="arrow-short" /></Link>
       </div>
     </section>
   );
 }
 
 export function Wine() {
+  const { t, tx } = useT();
+  const wines = categories.find((c) => c.id === "wine")?.dishes.filter((d) => d.available !== false) ?? [];
   return (
-    <section className="slide wine grain" id="wine" data-slide aria-label="Бар">
+    <section className="slide wine grain" id="wine" data-slide aria-label={t.wine.aria}>
       <div className="slide__media wine__media">
-        <img src={asset("/img/m-wine.jpg")} alt="Красное вино льётся в бокал на чёрном фоне" loading="lazy" />
+        <SlideVideo src="/video/wine.mp4" poster="/video/wine-poster.jpg" />
       </div>
       <div className="wine__shade" aria-hidden="true" />
       <h2 className="wine__title">
         <span className="display">Vino</span>
         <span className="italic">&amp; bar</span>
       </h2>
-      <p className="wine__text">Винная карта, коктейли, авторские лимонады и чай в чайнике — к каждому блюду.</p>
+      <div className="wine__card glass">
+        <p className="label wine__kicker">{t.wine.kicker}</p>
+        <ul className="wine__list">
+          {wines.map((w) => (
+            <li key={w.id}>
+              <span className="wine__name">{tx(w.name)}</span>
+              <span className="price num">{formatPrice(w.price)}</span>
+              {w.description && <span className="wine__note">{tx(w.description)}</span>}
+            </li>
+          ))}
+        </ul>
+        <Link className="btn btn--primary" href="/menu#wine">{t.wine.toMenu} <Icon name="arrow-short" /></Link>
+      </div>
     </section>
   );
 }
