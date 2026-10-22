@@ -360,15 +360,16 @@ html:not(.lenis) { scroll-behavior: smooth; }
   .events__actions .btn { flex: 1 1 100%; }
 
   .wine__media video { object-position: 50% 50%; }
-  .wine__shade { background: linear-gradient(to top, rgba(31,3,5,.9), rgba(31,3,5,.15) 60%); }
-  .wine__title { left: 16px; top: 96px; transform: none; }
+  .wine__shade { background: linear-gradient(to top, rgba(31,3,5,.92), rgba(31,3,5,.55) 55%, rgba(31,3,5,.15) 85%); }
+  /* На телефоне надпись VINO и карта вин — один блок у низа экрана: карта всегда сразу под надписью */
+  .wine { display: flex; flex-direction: column; justify-content: flex-end; gap: 24px; padding: 96px 16px 24px; }
+  .wine__title { position: static; transform: none; }
   .wine__title .display { font-size: 24vw; }
   .wine__title .italic { font-size: 11vw; }
-  /* Плашка ниже надписи VINO: на телефоне три вина без описаний, полный список — в меню */
-  .wine__card { left: 16px; right: 16px; bottom: 24px; width: auto; padding: 14px 18px 16px; gap: 10px; }
-  .wine__list li { padding: 6px 0; }
-  .wine__list li:nth-child(n+4), .wine__note { display: none; }
+  .wine__card { position: static; width: auto; padding: 16px 18px 18px; gap: 12px; }
+  .wine__list li { padding: 7px 0; }
   .wine__name { font-size: 17px; }
+  .wine__note { font-size: 12px; }
   .wine__card .btn { justify-self: stretch; }
 
 
