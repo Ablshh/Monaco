@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { CarteNav } from "@/components/CarteNav";
 import { Icon } from "@/components/Icon";
 import { banquet, categories, formatPrice, type Dish } from "@/data/menu";
@@ -13,15 +14,49 @@ import { LangSwitch, LangSync } from "./LangSwitch";
 
 const ROMAN = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII"];
 
-function DishRow({ d }: { d: Dish }) {
+/** Фото блюда крупно: открывается по нажатию на миниатюру, закрывается крестиком, фоном или Esc */
+function DishZoom({ d, onClose }: { d: Dish; onClose: () => void }) {
+  const { t, tx } = useT();
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const dlg = ref.current;
+    dlg?.showModal();
+    return () => dlg?.close();
+  }, []);
+  const name = tx(d.name);
+  return (
+    <dialog className={`zoom${d.available === false ? " zoom--off" : ""}`} ref={ref} aria-label={name} onClose={onClose}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="zoom__card">
+        <button className="zoom__close" type="button" onClick={onClose} aria-label={t.carte.close}><Icon name="close" /></button>
+        <img className="zoom__photo" src={asset(`/menu/${d.id}.webp`)} alt={name} width={640} height={640} />
+        <div className="zoom__text">
+          <h3 className="zoom__name">{name}</h3>
+          <p className="zoom__price num">{formatPrice(d.price)}</p>
+          {(d.description || d.weight) && (
+            <p className="zoom__meta">
+              {d.description && tx(d.description)}
+              {d.description && d.weight && " · "}
+              {d.weight && localizeWeight(d.weight, t)}
+            </p>
+          )}
+        </div>
+      </div>
+    </dialog>
+  );
+}
+
+function DishRow({ d, onZoom }: { d: Dish; onZoom: (d: Dish) => void }) {
   const { t, tx } = useT();
   const off = d.available === false;
   const name = tx(d.name);
   return (
     <li className={`dish${off ? " dish--off" : ""}${d.photo ? " dish--photo" : ""}`}>
       {d.photo && (
-        <img className="dish__photo" src={asset(`/menu/${d.id}.webp`)} alt={name}
-          width={640} height={640} loading="lazy" decoding="async" />
+        <button className="dish__zoom" type="button" onClick={() => onZoom(d)} aria-label={t.carte.zoom(name)}>
+          <img className="dish__photo" src={asset(`/menu/${d.id}.webp`)} alt=""
+            width={640} height={640} loading="lazy" decoding="async" />
+        </button>
       )}
       <div className="dish__row">
         <h3 className="dish__name">{name}</h3>
@@ -45,6 +80,7 @@ function DishRow({ d }: { d: Dish }) {
 
 export function Carte() {
   const { t, tx } = useT();
+  const [zoom, setZoom] = useState<Dish | null>(null);
   return (
     <div className="carte">
       <LangSync title="carte" />
@@ -79,7 +115,7 @@ export function Carte() {
               <h2 className="course__title" id={`h-${c.id}`}>{tx(c.title)}</h2>
               <span className="course__count">{t.carte.positions(c.dishes.length)}</span>
             </header>
-            <ul className="dishes">{c.dishes.map((d) => <DishRow key={d.id} d={d} />)}</ul>
+            <ul className="dishes">{c.dishes.map((d) => <DishRow key={d.id} d={d} onZoom={setZoom} />)}</ul>
           </section>
         ))}
       </main>
@@ -118,6 +154,8 @@ export function Carte() {
           </ul>
         </details>
       </footer>
+
+      {zoom && <DishZoom d={zoom} onClose={() => setZoom(null)} />}
 
       <div className="carte-dock" role="group" aria-label={t.carte.dockLabel}>
         <a className="carte-dock__order" href={whatsappLink(t.orderText)} target="_blank" rel="noopener"><Icon name="bag" />{t.carte.dockOrder}</a>

@@ -364,9 +364,11 @@ html:not(.lenis) { scroll-behavior: smooth; }
   .wine__title { left: 16px; top: 96px; transform: none; }
   .wine__title .display { font-size: 24vw; }
   .wine__title .italic { font-size: 11vw; }
-  .wine__card { left: 16px; right: 16px; bottom: 32px; width: auto; padding: 18px 20px 20px; gap: 12px; }
-  .wine__list li { padding: 8px 0; }
-  .wine__name { font-size: 18px; }
+  /* Плашка ниже надписи VINO: на телефоне три вина без описаний, полный список — в меню */
+  .wine__card { left: 16px; right: 16px; bottom: 24px; width: auto; padding: 14px 18px 16px; gap: 10px; }
+  .wine__list li { padding: 6px 0; }
+  .wine__list li:nth-child(n+4), .wine__note { display: none; }
+  .wine__name { font-size: 17px; }
   .wine__card .btn { justify-self: stretch; }
 
 

@@ -104,6 +104,10 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
   filter: drop-shadow(0 12px 14px rgba(30,13,13,.16)) drop-shadow(0 2px 3px rgba(30,13,13,.12));
   transition: transform .6s var(--ease-out);
 }
+.dish__zoom {
+  grid-row: 1 / span 2; padding: 0; border: 0; background: none; cursor: zoom-in;
+  border-radius: var(--radius-md, 12px); -webkit-tap-highlight-color: transparent;
+}
 .dish--photo:hover .dish__photo { transform: scale(1.07) rotate(-2deg); }
 .dish:first-child { border-top: 0; padding-top: 4px; }
 .dish--photo:first-child { padding-top: 0; }
@@ -199,6 +203,8 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
   .dish__meta { flex-wrap: wrap; }
   .dish--photo { grid-template-columns: 84px minmax(0, 1fr); column-gap: 16px; }
   .dish__photo { width: 84px; height: 84px; }
+  .zoom__card { padding: 24px 20px 22px; }
+  .zoom__name { font-size: 26px; }
   .dish--photo .dish__name, .dish--photo .dish__price { font-size: 19px; }
   .dish--photo .dish__meta { flex-direction: column; gap: 2px; }
   .dish--photo .dish__w::before { content: none; margin: 0; }
@@ -223,3 +229,31 @@ html:has(.carte) { scrollbar-color: var(--rouge-600) var(--paper); scroll-behavi
   font-size: 10px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; line-height: 1.4;
 }
 body:has(.carte) { background: #F6F1E9; }
+
+/* ---------- Фото блюда крупно ---------- */
+.zoom {
+  width: min(560px, calc(100vw - 32px)); max-width: none; max-height: calc(100dvh - 32px);
+  margin: auto; padding: 0; border: 0; border-radius: var(--radius-lg, 20px);
+  background: var(--paper); color: var(--ink); overflow: auto;
+  box-shadow: 0 30px 80px rgba(30,13,13,.35);
+}
+.zoom::backdrop { background: rgba(30,13,13,.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.zoom[open] { animation: zoom-in var(--dur-base, .3s) var(--ease-out, ease-out); }
+@keyframes zoom-in { from { opacity: 0; transform: scale(.94); } }
+.zoom__card { position: relative; display: grid; justify-items: center; gap: 16px; padding: 32px 32px 28px; text-align: center; }
+.zoom__close {
+  position: absolute; top: 12px; right: 12px; display: grid; place-items: center;
+  width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--paper-2); color: var(--ink); cursor: pointer;
+}
+.zoom__close .icon { width: 20px; height: 20px; }
+.zoom__close:hover { color: var(--accent); }
+.zoom__photo {
+  width: min(440px, 100%, 52dvh); height: auto; aspect-ratio: 1; object-fit: contain;
+  filter: drop-shadow(0 18px 22px rgba(30,13,13,.2)) drop-shadow(0 3px 4px rgba(30,13,13,.14));
+}
+.zoom__text { display: grid; gap: 6px; }
+.zoom__name { font-family: var(--font-display); font-weight: 500; font-size: 32px; line-height: 1.05; }
+.zoom__price { font-family: var(--font-display); font-size: 22px; color: var(--accent); }
+.zoom__meta { font-size: 14px; color: var(--ink-soft); }
+.zoom--off .zoom__photo { filter: grayscale(1); opacity: .6; }
+@media (prefers-reduced-motion: reduce) { .zoom[open] { animation: none; } }
